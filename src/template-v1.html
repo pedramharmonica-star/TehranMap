@@ -1,0 +1,379 @@
+<title>نقشه محدوده پشتیبانی پیام‌گستر</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap">
+<style>
+/*__LFCSS__*/
+</style>
+<style>
+/* Layout: full-height map app; service panel docked on the right (RTL), becomes a bottom sheet on phones */
+:root{
+  --ground:#e9ece6; --ground-2:#dfe3db; --panel:#fbfbf8; --ink:#1d2421; --muted:#5d6862; --line:#d3d8d0;
+  --z1:#0e7c6b; --z1-soft:#0e7c6b26; --z2:#d48a12; --z2-soft:#d48a1238; --z3:#8c3a6b; --z3-soft:#8c3a6b1f;
+  --city-edge:#0a5a4e; --label:#17302a; --halo:#ffffffd9; --shadow:0 10px 30px -12px #1d242140;
+  --font:"Vazirmatn",Tahoma,"Segoe UI",sans-serif; --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#151a19; --ground-2:#1b2120; --panel:#1c2221; --ink:#e7ece8; --muted:#9aa6a0; --line:#2e3634;
+  --z1:#2bb39c; --z1-soft:#2bb39c2e; --z2:#f0a632; --z2-soft:#f0a6322e; --z3:#d27aab; --z3-soft:#d27aab1c;
+  --city-edge:#7fe0cd; --label:#e5f3ee; --halo:#151a19d9; --shadow:0 10px 30px -12px #000a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#151a19; --ground-2:#1b2120; --panel:#1c2221; --ink:#e7ece8; --muted:#9aa6a0; --line:#2e3634;
+  --z1:#2bb39c; --z1-soft:#2bb39c2e; --z2:#f0a632; --z2-soft:#f0a6322e; --z3:#d27aab; --z3-soft:#d27aab1c;
+  --city-edge:#7fe0cd; --label:#e5f3ee; --halo:#151a19d9; --shadow:0 10px 30px -12px #000a; color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--font);font-size:14px;overflow:hidden}
+.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 380px;direction:rtl}
+#map{grid-column:1;grid-row:1;height:100%;background:var(--ground);direction:ltr;font-family:var(--font)}
+.panel{grid-column:2;grid-row:1;background:var(--panel);border-inline-start:1px solid var(--line);overflow-y:auto;
+  padding-block:22px 28px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:18px}
+.app{direction:ltr}.panel{direction:rtl;grid-column:2}
+@media (max-width:820px){
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto;min-height:100%}
+  #map{grid-column:1;grid-row:1;height:62vh}
+  .panel{grid-column:1;grid-row:2;border-inline-start:0;border-top:1px solid var(--line);overflow:visible}
+}
+
+.brand{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.02em;color:var(--muted);font-weight:500}
+h1{margin:0;font-size:22px;line-height:1.35;font-weight:800;text-wrap:balance}
+.lede{margin:0;color:var(--muted);line-height:1.8;font-size:13.5px}
+
+.search{position:relative}
+.search label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.search input{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);
+  background:var(--ground);color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+.search input:focus{border-color:var(--z1);box-shadow:0 0 0 3px var(--z1-soft)}
+.results{position:absolute;inset-inline:0;top:100%;margin-top:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  box-shadow:var(--shadow);max-height:260px;overflow-y:auto;z-index:20;padding:4px}
+.results button{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;font-size:13.5px}
+.results button:hover,.results button:focus-visible{background:var(--ground)}
+.results .empty{padding:10px;color:var(--muted);font-size:13px}
+
+.layers{display:flex;flex-direction:column;gap:10px}
+.layers-head{display:flex;align-items:baseline;justify-content:space-between}
+.layers-head h2{margin:0;font-size:14px;font-weight:700}
+.layers-head span{font-size:12px;color:var(--muted)}
+.layer{border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:start;
+  background:var(--panel);transition:border-color .25s,box-shadow .25s,transform .25s;cursor:pointer;position:relative}
+.layer:hover{border-color:color-mix(in srgb,var(--zc) 55%,var(--line))}
+.layer.focus{border-color:var(--zc);box-shadow:0 0 0 3px color-mix(in srgb,var(--zc) 22%,transparent)}
+.layer.off{opacity:.55}
+.layer.ping{animation:ping .9s ease}
+@keyframes ping{0%{transform:scale(1)}35%{transform:scale(1.02);box-shadow:0 0 0 6px color-mix(in srgb,var(--zc) 25%,transparent)}100%{transform:scale(1)}}
+.swatch{grid-row:span 2;width:34px;height:34px;border-radius:9px;background:var(--zc);position:relative;overflow:hidden}
+.swatch.hatch{background:repeating-linear-gradient(135deg,var(--zc) 0 3px,transparent 3px 7px),var(--z3-soft);border:1.5px solid var(--zc);box-sizing:border-box}
+.swatch.ring{background:var(--z2-soft);border:2.5px dashed var(--zc);box-sizing:border-box}
+.layer h3{margin:0;font-size:14.5px;font-weight:700;line-height:1.5}
+.layer p{margin:0;grid-column:2;color:var(--muted);font-size:12.5px;line-height:1.75}
+.layer .meta{grid-column:2 / 4;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{all:unset;cursor:pointer;font-size:12px;padding:3px 9px;border-radius:999px;background:var(--ground);border:1px solid var(--line);color:var(--ink);transition:background .2s,border-color .2s}
+.chip:hover,.chip:focus-visible{border-color:var(--zc);background:color-mix(in srgb,var(--zc) 12%,var(--ground))}
+.stat{font-size:12px;color:var(--muted)}.stat b{color:var(--ink);font-weight:700}
+.toggle{all:unset;cursor:pointer;width:38px;height:22px;border-radius:999px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.toggle::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.3,1.4,.5,1);box-shadow:0 1px 2px #0004}
+.toggle[aria-checked="true"]{background:var(--zc)}
+.toggle[aria-checked="true"]::after{transform:translateX(-16px)}
+.toggle:focus-visible,.layer:focus-visible{outline:2px solid var(--zc);outline-offset:2px}
+
+.result{border-radius:12px;padding:14px;background:color-mix(in srgb,var(--zc,var(--line)) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--zc,var(--line)) 40%,var(--line));
+  display:flex;flex-direction:column;gap:6px}
+.result .k{font-size:12px;color:var(--muted)}
+.result .v{font-size:15px;font-weight:700;line-height:1.6}
+.result .c{font-family:var(--mono);font-size:11.5px;color:var(--muted);direction:ltr;text-align:right}
+.result[hidden],.results[hidden]{display:none}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.8}
+.foot{margin-top:auto;font-size:11.5px;color:var(--muted);line-height:1.8;border-top:1px solid var(--line);padding-top:12px}
+
+/* ---- map styling ---- */
+.leaflet-container{background:var(--ground);font-family:var(--font)}
+.leaflet-container a{color:var(--z1)}
+.leaflet-control-attribution{background:color-mix(in srgb,var(--panel) 85%,transparent)!important;color:var(--muted)!important;font-size:10.5px;direction:rtl}
+.leaflet-bar a{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.leaflet-bar a:hover{background:var(--ground)}
+.leaflet-bar{border:1px solid var(--line)!important;box-shadow:var(--shadow)!important}
+.reset-btn{font:600 12px/30px var(--font)!important;width:auto!important;height:30px!important;padding:0 10px;direction:rtl;white-space:nowrap}
+
+.z3{fill:url(#hatch);stroke:none}
+.z2{fill:var(--z2);fill-opacity:.17;stroke:none;transition:fill-opacity .4s}
+.z2-edge{fill:none;stroke:var(--z2);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10 7;animation:march 1.6s linear infinite}
+.z2-draw{fill:none;stroke:var(--z2);stroke-width:3;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.2s cubic-bezier(.6,.1,.2,1) .2s forwards}
+@keyframes march{to{stroke-dashoffset:-34}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.dist{fill:var(--z1);fill-opacity:.34;stroke:var(--panel);stroke-width:1.1;transition:fill-opacity .25s,stroke-width .25s;cursor:pointer;
+  animation:rise .7s ease-out both}
+.dist.hl{fill-opacity:.62;stroke:var(--city-edge);stroke-width:2.4}
+@keyframes rise{from{opacity:0}to{opacity:1}}
+.city-edge{fill:none;stroke:var(--city-edge);stroke-width:2.6;stroke-linejoin:round;filter:drop-shadow(0 0 0 var(--z1));animation:glow 3.2s ease-in-out 1s infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 0px var(--z1))}50%{filter:drop-shadow(0 0 7px var(--z1))}}
+
+/* focus (highlight) states */
+#map.f1 .z2,#map.f1 .z3{opacity:.25}#map.f1 .z2-edge{opacity:.35}
+#map.f2 .dist{fill-opacity:.1;animation:none}#map.f2 .z3{opacity:.25}#map.f2 .z2{fill-opacity:.38}
+#map.f3 .dist{fill-opacity:.1;animation:none}#map.f3 .z2{fill-opacity:.06}#map.f3 .z3{opacity:1}
+.z2,.z3,.z2-edge,.dist{transition:opacity .4s,fill-opacity .4s}
+
+.dlabel{font:800 12px var(--font);color:var(--label);text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 6px var(--halo);white-space:nowrap;pointer-events:none;text-align:center;transform:translate(-50%,-50%);width:max-content}
+.plabel{display:flex;align-items:center;gap:5px;transform:translate(-5px,-50%);width:max-content;pointer-events:auto;cursor:pointer;direction:rtl}
+.plabel i{width:8px;height:8px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 2px var(--halo);flex:none}
+.plabel span{font:600 11.5px var(--font);color:var(--ink);text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 5px var(--halo)}
+.zoom-lo .plabel span{display:none}
+.zoom-lo .dlabel{font-size:10px}
+
+.pin{position:relative;width:0;height:0}
+.pin i{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--pc);border:2.5px solid #fff;box-shadow:0 2px 6px #0005}
+.pin b{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;border:2px solid var(--pc);animation:ripple 1.8s ease-out infinite}
+.pin b:nth-child(2){animation-delay:.6s}
+@keyframes ripple{from{transform:scale(1);opacity:.9}to{transform:scale(4.2);opacity:0}}
+
+.leaflet-tooltip.dtip,.leaflet-popup-content-wrapper{background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);direction:rtl;font-family:var(--font);border-radius:10px}
+.leaflet-tooltip.dtip{padding:8px 11px;font-size:12.5px;line-height:1.7}
+.leaflet-tooltip.dtip::before{display:none}
+.leaflet-popup-tip{background:var(--panel)}
+.leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.75;min-width:210px}
+.pop-zone{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.pop-zone i{width:10px;height:10px;border-radius:3px;background:var(--pc);flex:none}
+.pop-sub{color:var(--muted);font-size:12px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .z2-draw{display:none}
+}
+</style>
+
+<div class="app">
+  <div id="map" role="application" aria-label="نقشه محدوده پشتیبانی"></div>
+  <aside class="panel">
+    <div class="brand">
+      <span class="eyebrow">پیام‌گستر · واحد پشتیبانی و فروش</span>
+      <h1>محدوده پشتیبانی حضوری</h1>
+      <p class="lede">روی هر نقطه از نقشه بزنید یا نام شهر و منطقه را جستجو کنید تا نوع پشتیبانی و هزینه‌ی آن را ببینید.</p>
+    </div>
+
+    <div class="search">
+      <label for="q">استعلام محدوده</label>
+      <input id="q" type="search" placeholder="مثلاً: قدس، لواسان، منطقه ۵" autocomplete="off">
+      <div class="results" id="results" hidden></div>
+    </div>
+
+    <div class="result" id="result" hidden></div>
+
+    <section class="layers" aria-label="لایه‌ها">
+      <div class="layers-head"><h2>لایه‌ها</h2><span>برای برجسته‌سازی روی هر لایه بزنید</span></div>
+
+      <div class="layer" data-z="1" tabindex="0" style="--zc:var(--z1)">
+        <div class="swatch"></div>
+        <h3>پشتیبانی حضوری</h3>
+        <button class="toggle" role="switch" aria-checked="true" aria-label="نمایش لایه پشتیبانی حضوری" id="t1"></button>
+        <p>محدوده‌ی مناطق ۲۲گانه‌ی شهرداری تهران.</p>
+        <div class="meta" id="m1"></div>
+      </div>
+
+      <div class="layer" data-z="2" tabindex="0" style="--zc:var(--z2)">
+        <div class="swatch ring"></div>
+        <h3>حضوری با هزینه ایاب و ذهاب</h3>
+        <button class="toggle" role="switch" aria-checked="true" aria-label="نمایش لایه حضوری با ایاب و ذهاب" id="t2"></button>
+        <p>از مرز مناطق ۲۲گانه تا خط محدوده؛ هزینه‌ی رفت‌وآمد کارشناس به فاکتور اضافه می‌شود.</p>
+        <div class="meta" id="m2"></div>
+      </div>
+
+      <div class="layer" data-z="3" tabindex="0" style="--zc:var(--z3)">
+        <div class="swatch hatch"></div>
+        <h3>ایاب و ذهاب و حق مأموریت</h3>
+        <button class="toggle" role="switch" aria-checked="true" aria-label="نمایش لایه ایاب و ذهاب و حق مأموریت" id="t3"></button>
+        <p>خارج از محدوده. اعزام فقط با تأیید فروشنده و با هزینه‌ی ایاب و ذهاب و حق مأموریت انجام می‌شود.</p>
+        <div class="meta" id="m3"></div>
+      </div>
+    </section>
+
+    <p class="hint">مرز مناطق از لایه‌ی رسمی مناطق ۲۲گانه است. خط محدوده‌ی بیرونی از روی ترسیم دستی صاف شده و تقریبی است؛ برای آدرس‌های نزدیک مرز، با فروشنده هماهنگ کنید.</p>
+    <div class="foot">نسخه‌ی آزمایشی ۱ · آمار جمعیت و مساحت مناطق از همان لایه‌ی مناطق</div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const GEO = /*__GEO__*/null;
+(function(){
+const fa = n => Number(n).toLocaleString('fa-IR');
+const faD = (n,d=1) => Number(n).toLocaleString('fa-IR',{maximumFractionDigits:d});
+const ZONES = {
+  1:{name:'پشتیبانی حضوری', cost:'بدون هزینه‌ی ایاب و ذهاب', color:'var(--z1)'},
+  2:{name:'حضوری با هزینه ایاب و ذهاب', cost:'هزینه‌ی ایاب و ذهاب دریافت می‌شود', color:'var(--z2)'},
+  3:{name:'حضوری با تأیید فروشنده', cost:'ایاب و ذهاب + حق مأموریت', color:'var(--z3)'}
+};
+
+/* ---------- geometry helpers ---------- */
+const flip = ring => ring.map(([x,y])=>[y,x]);
+function inRing(p,r){let c=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const[xi,yi]=r[i],[xj,yj]=r[j];if(((yi>p[1])!==(yj>p[1]))&&(p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi))c=!c}return c}
+function inPoly(p,rs){if(!inRing(p,rs[0]))return false;for(let k=1;k<rs.length;k++)if(inRing(p,rs[k]))return false;return true}
+function inGeom(p,g){return g.type==='Polygon'?inPoly(p,g.coordinates):g.coordinates.some(c=>inPoly(p,c))}
+function classify(lon,lat){
+  const p=[lon,lat];
+  for(const d of GEO.districts) if(inGeom(p,d.geometry)) return {z:1,d:d.properties.id};
+  if(inGeom(p,GEO.outer)) return {z:2};
+  return {z:3};
+}
+function ringArea(r){ // km² on a local equirectangular projection
+  const k=111.32, lat0=35.7*Math.PI/180; let s=0;
+  for(let i=0,j=r.length-1;i<r.length;j=i++) s+=(r[j][0]*k*Math.cos(lat0))*(r[i][1]*k)-(r[i][0]*k*Math.cos(lat0))*(r[j][1]*k);
+  return Math.abs(s/2);
+}
+
+/* ---------- map ---------- */
+const renderer = L.svg({padding:0.6});
+const outerB = L.latLngBounds(flip(GEO.outer.coordinates[0]));
+const map = L.map('map',{renderer, zoomControl:true, attributionControl:true, minZoom:8, maxZoom:14, zoomSnap:0.25, wheelPxPerZoomLevel:90,
+  maxBounds: outerB.pad(0.9), maxBoundsViscosity:0.8});
+map.attributionControl.setPrefix(false).addAttribution('مرز مناطق: لایه‌ی مناطق ۲۲گانه · محدوده: ترسیم واحد فروش · Leaflet');
+const fitOpts = () => ({padding: innerWidth<820?[16,16]:[28,28]});
+map.fitBounds(outerB, fitOpts());
+
+const panes = ['p3','p2','pDist','pEdge','pLabels'];
+panes.forEach((p,i)=>{map.createPane(p).style.zIndex=400+i*10});
+map.getPane('pLabels').style.zIndex=640;
+
+// zone 3: everything outside the outer line (hatched mask)
+const W=[[34.6,50.2],[34.6,52.8],[36.8,52.8],[36.8,50.2],[34.6,50.2]];
+const z3 = L.polygon([W, flip(GEO.outer.coordinates[0])],{pane:'p3',className:'z3',stroke:false,interactive:false});
+// zone 2: ring between city and outer line
+const z2 = L.polygon([flip(GEO.outer.coordinates[0]), flip(GEO.city.coordinates[0])],{pane:'p2',className:'z2',stroke:false,interactive:false});
+const z2Edge = L.polygon(flip(GEO.outer.coordinates[0]),{pane:'pEdge',className:'z2-edge',interactive:false,fill:false});
+const z2Draw = L.polygon(flip(GEO.outer.coordinates[0]),{pane:'pEdge',className:'z2-draw',interactive:false,fill:false});
+const cityEdge = L.polygon(flip(GEO.city.coordinates[0]),{pane:'pEdge',className:'city-edge',interactive:false,fill:false});
+
+const distLayers = {};
+const dists = L.layerGroup();
+GEO.districts.forEach((d,i)=>{
+  const g=d.geometry, rings = g.type==='Polygon'?[g.coordinates.map(flip)]:g.coordinates.map(p=>p.map(flip));
+  const pr=d.properties;
+  const lyr = L.polygon(rings,{pane:'pDist',className:'dist'});
+  lyr.on('add',()=>{const el=lyr.getElement(); if(el) el.style.animationDelay=(0.25+i*0.045)+'s'});
+  lyr.bindTooltip(`<b>منطقه ${fa(pr.id)} تهران</b><br>جمعیت ${fa(pr.pop)} نفر · ${faD(pr.area)} کیلومتر مربع<br><span style="color:var(--z1);font-weight:700">پشتیبانی حضوری</span>`,
+    {className:'dtip',sticky:true,direction:'top',offset:[0,-8]});
+  lyr.on('mouseover',()=>{lyr.getElement()?.classList.add('hl')});
+  lyr.on('mouseout',()=>{lyr.getElement()?.classList.remove('hl')});
+  lyr.on('click',e=>{L.DomEvent.stopPropagation(e); probe(e.latlng,{label:`منطقه ${fa(pr.id)} تهران`})});
+  dists.addLayer(lyr); distLayers[pr.id]=lyr;
+});
+const dLabels = L.layerGroup(GEO.districts.map(d=>L.marker([d.properties.ly,d.properties.lx],{pane:'pLabels',interactive:false,keyboard:false,
+  icon:L.divIcon({className:'',html:`<div class="dlabel">${fa(d.properties.id)}</div>`,iconSize:[0,0]})})));
+const pLabels = L.layerGroup(GEO.places.filter(p=>p.z!==1).map(p=>{
+  const m=L.marker([p.lat,p.lon],{pane:'pLabels',keyboard:false,title:p.n,
+    icon:L.divIcon({className:'',html:`<div class="plabel" style="--pc:${ZONES[p.z].color}"><i></i><span>${p.n}</span></div>`,iconSize:[0,0]})});
+  m.on('click',e=>{L.DomEvent.stopPropagation(e); probe(L.latLng(p.lat,p.lon),{label:p.n})});
+  return m;
+}));
+
+// hatch pattern lives inside the SVG renderer
+z3.addTo(map);
+const svg = z3.getElement().ownerSVGElement;
+const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+defs.innerHTML = `<pattern id="hatch" patternUnits="userSpaceOnUse" width="9" height="9" patternTransform="rotate(45)">
+  <rect width="9" height="9" style="fill:var(--z3);fill-opacity:.07"/><line x1="0" y1="0" x2="0" y2="9" style="stroke:var(--z3);stroke-width:1.6;stroke-opacity:.38"/></pattern>`;
+svg.insertBefore(defs, svg.firstChild);
+
+const layerSets = {1:[dists,cityEdge,dLabels], 2:[z2,z2Edge,z2Draw], 3:[z3]};
+[z2,z2Draw,z2Edge,dists,cityEdge,dLabels,pLabels].forEach(l=>l.addTo(map));
+// the boundary draws in once, then hands over to the marching dashed edge
+const drawPath = z2Draw.getElement(); if(drawPath){drawPath.setAttribute('pathLength','1')}
+const edgeEl = z2Edge.getElement(); if(edgeEl){edgeEl.style.opacity='0'; setTimeout(()=>{edgeEl.style.transition='opacity .6s';edgeEl.style.opacity='';},2300)}
+setTimeout(()=>{map.removeLayer(z2Draw)},2700);
+
+// keep the svg pathLength attribute after Leaflet redraws the draw-in path
+map.on('zoomend moveend',()=>{const el=z2Draw.getElement(); if(el) el.setAttribute('pathLength','1')});
+const zoomClass=()=>map.getContainer().classList.toggle('zoom-lo',map.getZoom()<9.75);
+map.on('zoomend',zoomClass); zoomClass();
+
+// reset-view control
+const Reset = L.Control.extend({options:{position:'topleft'},onAdd(){
+  const c=L.DomUtil.create('div','leaflet-bar'); const a=L.DomUtil.create('a','reset-btn',c);
+  a.href='#'; a.textContent='نمای کامل'; a.setAttribute('role','button');
+  L.DomEvent.on(a,'click',e=>{L.DomEvent.preventDefault(e);L.DomEvent.stopPropagation(e);setFocus(null);map.flyToBounds(outerB,{...fitOpts(),duration:.8})});
+  return c;}});
+map.addControl(new Reset());
+
+/* ---------- probe (click / search) ---------- */
+let pin=null;
+const resultEl=document.getElementById('result');
+function probe(latlng,{label}={}){
+  const c=classify(latlng.lng,latlng.lat), Z=ZONES[c.z];
+  if(pin) map.removeLayer(pin);
+  pin=L.marker(latlng,{pane:'pLabels',interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],
+    html:`<div class="pin" style="--pc:${Z.color}"><b></b><b></b><i></i></div>`})}).addTo(map);
+  const where = label || (c.z===1?`منطقه ${fa(c.d)} تهران`:'نقطه‌ی انتخاب‌شده');
+  const sub = c.z===1 && label && !label.startsWith('منطقه') ? ` · منطقه ${fa(c.d)}` : '';
+  L.popup({offset:[0,-6],autoPanPadding:[20,20],closeButton:true}).setLatLng(latlng)
+    .setContent(`<div class="pop-sub">${where}${sub}</div><div class="pop-zone" style="--pc:${Z.color}"><i></i>${Z.name}</div><div class="pop-sub">${Z.cost}</div>`)
+    .openOn(map);
+  resultEl.hidden=false; resultEl.style.setProperty('--zc',Z.color);
+  resultEl.innerHTML=`<span class="k">نتیجه‌ی استعلام · ${where}${sub}</span><span class="v">${Z.name}</span><span class="k">${Z.cost}${c.z===3?' · نیاز به تأیید فروشنده':''}</span>
+    <span class="c">${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}</span>`;
+  const card=document.querySelector(`.layer[data-z="${c.z}"]`); card.classList.remove('ping'); void card.offsetWidth; card.classList.add('ping');
+}
+map.on('click',e=>probe(e.latlng));
+
+/* ---------- layer cards: toggle + focus ---------- */
+let focused=null;
+function setFocus(z){
+  focused = (focused===z)?null:z;
+  const m=map.getContainer(); m.classList.remove('f1','f2','f3'); if(focused) m.classList.add('f'+focused);
+  document.querySelectorAll('.layer').forEach(el=>el.classList.toggle('focus',+el.dataset.z===focused));
+  if(!focused) return;
+  if(focused===1) map.flyToBounds(L.latLngBounds(flip(GEO.city.coordinates[0])),{...fitOpts(),duration:.9});
+  else if(focused===2) map.flyToBounds(outerB,{...fitOpts(),duration:.9});
+  else map.flyToBounds(outerB.pad(0.35),{...fitOpts(),duration:.9});
+}
+document.querySelectorAll('.layer').forEach(card=>{
+  const z=+card.dataset.z, t=card.querySelector('.toggle');
+  card.addEventListener('click',e=>{ if(e.target.closest('.toggle,.chip')) return; setFocus(z) });
+  card.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target===card){e.preventDefault();setFocus(z)} });
+  t.addEventListener('click',()=>{
+    const on=t.getAttribute('aria-checked')!=='true'; t.setAttribute('aria-checked',on); card.classList.toggle('off',!on);
+    layerSets[z].forEach(l=> on? l.addTo(map) : map.removeLayer(l));
+    if(z===3 && on) z3.bringToBack();
+  });
+});
+
+/* ---------- stats + chips ---------- */
+const pop = GEO.districts.reduce((s,d)=>s+d.properties.pop,0);
+const cityA = GEO.districts.reduce((s,d)=>s+d.properties.area,0);
+const outerA = ringArea(GEO.outer.coordinates[0]);
+function chip(p,z){const b=document.createElement('button');b.className='chip';b.textContent=p.n;b.type='button';
+  b.addEventListener('click',()=>{map.flyTo([p.lat,p.lon],Math.max(map.getZoom(),11),{duration:.8}); setTimeout(()=>probe(L.latLng(p.lat,p.lon),{label:p.n}),650)}); return b}
+const m1=document.getElementById('m1');
+m1.innerHTML=`<span class="stat"><b>${fa(22)}</b> منطقه · <b>${faD(cityA,0)}</b> کیلومتر مربع · جمعیت <b>${faD(pop/1e6,1)}</b> میلیون</span>`;
+const m2=document.getElementById('m2'); m2.innerHTML=`<span class="stat" style="flex-basis:100%">حدود <b>${faD(outerA-cityA,0)}</b> کیلومتر مربع، از جمله:</span>`;
+GEO.places.filter(p=>p.z===2).forEach(p=>m2.appendChild(chip(p,2)));
+const m3=document.getElementById('m3'); m3.innerHTML=`<span class="stat" style="flex-basis:100%">نمونه‌ها:</span>`;
+GEO.places.filter(p=>p.z===3).slice(0,12).forEach(p=>m3.appendChild(chip(p,3)));
+
+/* ---------- search ---------- */
+const q=document.getElementById('q'), res=document.getElementById('results');
+const norm=s=>s.replace(/[‌\s]+/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).toLowerCase();
+const index=[
+  ...GEO.districts.map(d=>({label:`منطقه ${fa(d.properties.id)}`,key:'منطقه'+d.properties.id,z:1,go:()=>{map.flyToBounds(distLayers[d.properties.id].getBounds(),{padding:[40,40],duration:.8,maxZoom:12.5});
+    setTimeout(()=>probe(L.latLng(d.properties.ly,d.properties.lx),{label:`منطقه ${fa(d.properties.id)} تهران`}),650)}})),
+  ...GEO.places.map(p=>({label:p.n,key:p.n,z:p.z,go:()=>{map.flyTo([p.lat,p.lon],Math.max(map.getZoom(),11),{duration:.8});setTimeout(()=>probe(L.latLng(p.lat,p.lon),{label:p.n}),650)}}))
+];
+function renderResults(){
+  const v=norm(q.value); if(!v){res.hidden=true;return}
+  const hits=index.filter(it=>norm(it.key).includes(v)||norm(it.label).includes(v)).slice(0,8);
+  res.innerHTML=''; res.hidden=false;
+  if(!hits.length){res.innerHTML='<div class="empty">نتیجه‌ای پیدا نشد. روی نقشه، نقطه‌ی مورد نظر را بزنید.</div>';return}
+  hits.forEach(h=>{const b=document.createElement('button');b.type='button';
+    b.innerHTML=`<span>${h.label}</span><span class="stat" style="color:${ZONES[h.z].color};font-weight:700">${ZONES[h.z].name}</span>`;
+    b.addEventListener('click',()=>{h.go();res.hidden=true;q.value=h.label;q.blur()}); res.appendChild(b)});
+}
+q.addEventListener('input',renderResults);
+q.addEventListener('keydown',e=>{if(e.key==='Enter'){const f=res.querySelector('button'); if(f) f.click()} if(e.key==='Escape'){res.hidden=true}});
+document.addEventListener('click',e=>{if(!e.target.closest('.search')) res.hidden=true});
+
+addEventListener('resize',()=>map.invalidateSize());
+})();
+</script>

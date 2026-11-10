@@ -1,0 +1,485 @@
+<title>نقشه محدوده پشتیبانی پیام‌گستر</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap">
+<style>
+/*__LFCSS__*/
+</style>
+<style>
+/* Layout: full-bleed street map; brand header card floats top-right, legend card bottom-right; both dock to edges on phones.
+   One deliberate light look (PayamGostar light brand): charcoal + orange chrome, neutral basemap, green / yellow / slate zones. */
+:root{
+  color-scheme:light;
+  --or:#F26122; --or-deep:#B8460F; --or-tint:#FDEEE6;
+  --night:#1C1F23; --slate:#3B4352; --gray:#6E747F; --mist:#A9ADB4; --line:#E3E5E8; --paper:#F6F6F7; --white:#FFFFFF;
+  --z1:#15936A; --z1-ink:#0B6B4C; --z2:#F5B800; --z2-ink:#8A6400; --z3:#4F5868;
+  --font:"Yekan Bakh","Vazirmatn",Tahoma,"Segoe UI",sans-serif; --mono:ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 12px 32px -14px rgba(28,31,35,.35),0 2px 6px -2px rgba(28,31,35,.12);
+}
+html,body{height:100%}
+body{background:var(--paper);color:var(--night);font-family:var(--font);font-size:14px;overflow:hidden}
+#map{position:fixed;inset:0;background:#EDEDE8;font-family:var(--font)}
+
+/* ---------- glass cards (brand header + legend) ---------- */
+.glass{position:fixed;z-index:800;right:calc(16px + env(safe-area-inset-right,0px));width:344px;max-width:calc(100vw - 32px);direction:rtl;color:var(--night);
+  border-radius:22px;isolation:isolate;
+  background:linear-gradient(150deg,rgba(255,255,255,.66) 0%,rgba(255,255,255,.42) 55%,rgba(255,255,255,.52) 100%);
+  -webkit-backdrop-filter:blur(18px) saturate(175%);backdrop-filter:blur(18px) saturate(175%);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 30px 60px -28px rgba(28,31,35,.45),0 10px 24px -12px rgba(28,31,35,.18),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.3);
+  animation:enter .8s cubic-bezier(.2,.8,.2,1) .15s both,float 7s ease-in-out 1.2s infinite;
+  transition:box-shadow .35s ease}
+.glass:hover{box-shadow:0 38px 70px -28px rgba(28,31,35,.5),0 12px 28px -12px rgba(28,31,35,.2),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.3)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:linear-gradient(112deg,transparent 35%,rgba(255,255,255,.65) 48%,transparent 61%) no-repeat;background-size:260% 100%;background-position:160% 0;
+  animation:sheen 10s ease-in-out 1.6s infinite}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-2;
+  background:radial-gradient(120% 70% at 100% 0%,rgba(242,97,34,.10),transparent 60%)}
+@keyframes enter{from{opacity:0;transform:translateX(28px) scale(.97);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+@keyframes float{0%,100%{translate:0 0}50%{translate:0 -3px}}
+@keyframes sheen{0%{background-position:160% 0}24%,100%{background-position:-60% 0}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:rgba(255,255,255,.94)}}
+
+.brandcard{top:calc(16px + env(safe-area-inset-top,0px));padding:18px 20px 18px;display:flex;flex-direction:column;gap:12px}
+.head{display:flex;flex-direction:column;gap:14px}
+.logo svg{display:block;height:36px;width:auto;--lm:#F26122;--lw:#5E6573}
+.brandcard h1{margin:0;font-size:20px;font-weight:800;line-height:1.45;text-wrap:balance;color:var(--night)}
+.brandcard h1::after{content:"";display:block;width:40px;height:4px;border-radius:4px;background:var(--or);margin-top:9px;transform-origin:right;animation:grow .7s cubic-bezier(.2,.8,.2,1) .7s both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.brandcard p{margin:0;color:#4A515E;font-size:12.5px;line-height:1.85}
+
+.search{position:relative}
+.search input{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:12px 42px 12px 14px;border-radius:13px;border:1px solid rgba(28,31,35,.10);
+  background:rgba(255,255,255,.72);color:var(--night);outline:none;box-shadow:inset 0 1px 2px rgba(28,31,35,.06);transition:border-color .2s,box-shadow .2s,background .2s}
+.search input::placeholder{color:#7C828D}
+.search input:focus{border-color:var(--or);background:rgba(255,255,255,.92);box-shadow:0 0 0 4px rgba(242,97,34,.18)}
+.search svg{position:absolute;right:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--slate);fill:none;stroke-width:1.75;stroke-linecap:round}
+.search svg .a{stroke:var(--or)}
+.results{position:absolute;inset-inline:0;top:100%;margin-top:8px;color:var(--night);border-radius:14px;max-height:290px;overflow-y:auto;padding:5px;z-index:5;
+  background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);
+  border:1px solid rgba(255,255,255,.8);box-shadow:0 24px 44px -20px rgba(28,31,35,.4)}
+.results[hidden]{display:none}
+.results button{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:13.5px}
+.results button:hover,.results button:focus-visible{background:rgba(242,97,34,.08)}
+.results small{color:var(--gray);font-size:11.5px;margin-inline-start:6px}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.b1{background:#E3F4ED;color:var(--z1-ink)}.b2{background:#FFF3C7;color:var(--z2-ink)}.b3{background:#ECEDF0;color:var(--slate)}
+.results .empty{padding:10px;color:var(--gray);font-size:13px;line-height:1.7}
+
+/* ---------- legend ---------- */
+.legend{bottom:calc(16px + env(safe-area-inset-bottom,0px));padding:14px 14px 12px;display:flex;flex-direction:column;gap:4px;
+  animation-delay:.35s,2.4s}
+.legend h2{margin:0 6px 4px;font-size:12.5px;font-weight:700;color:#4A515E;display:flex;justify-content:space-between;align-items:center}
+.legend h2 button{all:unset;cursor:pointer;color:var(--or-deep);font-size:12px;font-weight:600}
+.row{all:unset;box-sizing:border-box;display:grid;grid-template-columns:40px 1fr;gap:2px 12px;align-items:center;padding:9px 8px;border-radius:13px;cursor:pointer;
+  transition:background .25s,box-shadow .25s,transform .25s}
+.row:hover{background:rgba(255,255,255,.55);transform:translateX(-2px)}
+.row.on{background:rgba(255,255,255,.75);box-shadow:inset 0 0 0 1.5px var(--rc),0 6px 16px -10px rgba(28,31,35,.35)}
+.row:focus-visible{outline:2px solid var(--or);outline-offset:1px}
+.sw{grid-row:span 2;width:40px;height:30px;border-radius:9px;box-sizing:border-box}
+.sw1{background:rgba(21,147,106,.22);border:2.5px solid var(--z1)}
+.sw2{background:rgba(245,184,0,.32);border:3.5px solid var(--z2);box-shadow:inset 0 0 0 1px rgba(138,100,0,.25)}
+.sw3{background:repeating-linear-gradient(135deg,rgba(79,88,104,.45) 0 2px,transparent 2px 6px),rgba(241,242,244,.8);border:1px solid #C9CDD3}
+.row b{font-size:13.5px;font-weight:700;line-height:1.5}
+.row span{font-size:12px;color:#5A616D;line-height:1.6}
+.edge{display:flex;align-items:center;gap:10px;padding:9px 8px 2px;font-size:12px;color:var(--slate)}
+.edge i{width:40px;height:6px;border-radius:6px;background:var(--z2);box-shadow:0 0 0 1.5px rgba(138,100,0,.45);flex:none}
+.edge i.g{background:var(--z1);height:3px;box-shadow:none}
+.edgegrid{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;border-top:1px solid rgba(28,31,35,.08);margin-top:4px}
+.legend .collapse{display:none}
+
+/* ---------- map chrome ---------- */
+.leaflet-container{font-family:var(--font);background:#EDEDE8}
+.leaflet-control-attribution{background:rgba(255,255,255,.85)!important;color:var(--gray)!important;font-size:10px;direction:rtl}
+.leaflet-control-attribution a{color:var(--or-deep)}
+.leaflet-bar{border:0!important;box-shadow:var(--shadow)!important;border-radius:10px!important;overflow:hidden}
+.leaflet-bar a{background:var(--white);color:var(--night);border-color:var(--line);width:34px!important;height:34px!important;line-height:34px!important}
+.leaflet-bar a:hover{background:var(--paper);color:var(--or-deep)}
+.leaflet-bar a.reset-btn{font:600 12px/34px var(--font)!important;width:auto!important;padding:0 12px;direction:rtl;white-space:nowrap}
+.leaflet-left .leaflet-control{margin-left:calc(14px + env(safe-area-inset-left,0px))}
+.leaflet-top .leaflet-control{margin-top:calc(14px + env(safe-area-inset-top,0px))}
+
+/* zone overlays */
+.fillpane{mix-blend-mode:multiply}
+.z3{fill:url(#hatch);stroke:none;transition:opacity .4s}
+.z2{fill:var(--z2);fill-opacity:.15;stroke:none;transition:fill-opacity .35s,opacity .4s}
+.z1{fill:var(--z1);fill-opacity:.09;stroke:none;transition:fill-opacity .35s,opacity .4s}
+.dist{fill:var(--z1);fill-opacity:0;stroke:var(--z1);stroke-opacity:.55;stroke-width:1.2;stroke-dasharray:5 4;transition:fill-opacity .2s}
+.dist.hl{fill-opacity:.16}
+.city-edge{fill:none;stroke:var(--z1);stroke-width:2.6;stroke-linejoin:round}
+.y-case{fill:none;stroke:#7A5900;stroke-opacity:.45;stroke-width:8;stroke-linejoin:round}
+.y-edge{fill:none;stroke:var(--z2);stroke-width:4.5;stroke-linejoin:round}
+.y-run{fill:none;stroke:#FFF6D6;stroke-width:2;stroke-linecap:round;stroke-dasharray:.035 .965;animation:run 9s linear infinite;opacity:.95}
+.y-draw{fill:none;stroke:var(--z2);stroke-width:5;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.4s cubic-bezier(.65,.05,.25,1) .3s forwards}
+@keyframes run{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.hz1 .z1{fill-opacity:.2}.hz2 .z2{fill-opacity:.3}.hz3 .z3{opacity:1.0}
+.zhi .z1{fill-opacity:.035}.zhi .z2{fill-opacity:.055}.zhi.hz1 .z1{fill-opacity:.07}.zhi.hz2 .z2{fill-opacity:.1}.zhi .dist.hl{fill-opacity:.05}
+.f1 .z2,.f1 .z3{opacity:.25}.f2 .z1,.f2 .z3{opacity:.25}.f3 .z1,.f3 .z2{opacity:.2}
+
+/* hover tag */
+.tag{position:fixed;z-index:900;pointer-events:none;direction:rtl;background:var(--night);color:var(--white);border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.65;
+  box-shadow:var(--shadow);transform:translate(-50%,calc(-100% - 16px));white-space:nowrap;transition:opacity .15s}
+.tag[hidden]{display:none}
+.tag b{display:flex;align-items:center;gap:7px;font-size:13px}
+.tag b i{width:10px;height:10px;border-radius:3px;background:var(--tc);flex:none}
+.tag span{color:var(--mist);font-size:12px}
+
+/* pins & popups */
+.pin{position:relative;width:0;height:0}
+.pin i{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:6px;background:var(--or);border:3px solid #fff;box-sizing:border-box;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.pin b{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:6px;border:2px solid var(--or);animation:ripple 1.9s ease-out infinite}
+.pin b:nth-child(2){animation-delay:.65s}
+@keyframes ripple{from{transform:scale(1);opacity:.9}to{transform:scale(4);opacity:0}}
+.leaflet-popup-content-wrapper{border-radius:12px;box-shadow:var(--shadow);direction:rtl;font-family:var(--font)}
+.leaflet-popup-content{margin:12px 16px 13px;font-size:13px;line-height:1.75;min-width:220px}
+.pz{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14.5px;margin:2px 0}
+.pz i{width:12px;height:12px;border-radius:4px;background:var(--pc);flex:none}
+.ps{color:var(--gray);font-size:12px}
+.pc{font-family:var(--mono);font-size:11px;color:var(--mist);direction:ltr;text-align:right;margin-top:4px}
+.loading{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:850;background:var(--night);color:#fff;font-size:12px;padding:6px 12px;border-radius:999px;direction:rtl;box-shadow:var(--shadow)}
+.loading[hidden]{display:none}
+
+@media (max-width:720px){
+  .glass{right:8px;left:8px;width:auto;max-width:none;border-radius:18px;animation:enter .7s cubic-bezier(.2,.8,.2,1) .1s both}
+  .brandcard{top:calc(8px + env(safe-area-inset-top,0px));padding:12px 14px;gap:10px}
+  .head{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .logo{order:2}.logo svg{height:24px}
+  .brandcard p{display:none}
+  .brandcard h1{font-size:15.5px}.brandcard h1::after{display:none}
+  .legend{bottom:calc(8px + env(safe-area-inset-bottom,0px));padding:10px 12px;gap:0}
+  .row{padding:6px 6px}.row span{font-size:11.5px}.sw{width:32px;height:24px}
+  .legend .collapse{display:inline}
+  .legend.min .row span,.legend.min .edgegrid{display:none}
+  .leaflet-top .leaflet-control{margin-top:calc(140px + env(safe-area-inset-top,0px))}
+  .tag{display:none}
+  .leaflet-bottom{bottom:var(--lh,0px);transition:bottom .3s}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.y-draw{display:none}}
+</style>
+
+<div id="map" role="application" aria-label="نقشه محدوده پشتیبانی حضوری پیام‌گستر"></div>
+
+<header class="brandcard glass">
+  <div class="head">
+    <div class="logo" id="logo" aria-label="پیام‌گستر"></div>
+    <h1>محدوده پشتیبانی حضوری</h1>
+  </div>
+  <p>محله، شهر یا منطقه را جستجو کنید یا روی نقشه بزنید تا شرایط اعزام کارشناس را ببینید.</p>
+  <div class="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path class="a" d="M16 16l4.5 4.5"/></svg>
+    <input id="q" type="search" placeholder="مثلاً سعادت‌آباد، قدس، منطقه ۵" autocomplete="off" aria-label="جستجوی محله، شهر یا منطقه">
+    <div class="results" id="results" hidden></div>
+  </div>
+</header>
+
+<aside class="legend glass" id="legend" aria-label="راهنمای نقشه">
+  <h2><span>راهنمای نقشه</span><button class="collapse" id="collapse" type="button">جمع کردن</button></h2>
+  <button class="row" data-z="1" type="button" style="--rc:var(--z1)"><div class="sw sw1"></div><b>پشتیبانی حضوری</b><span>محدوده‌ی مناطق ۲۲گانه‌ی تهران</span></button>
+  <button class="row" data-z="2" type="button" style="--rc:var(--z2)"><div class="sw sw2"></div><b>حضوری با هزینه ایاب و ذهاب</b><span>از مرز مناطق ۲۲گانه تا خط زرد</span></button>
+  <button class="row" data-z="3" type="button" style="--rc:var(--z3)"><div class="sw sw3"></div><b>نیازمند تأیید فروشنده</b><span>بیرون از خط زرد · ایاب و ذهاب و حق مأموریت</span></button>
+  <div class="edgegrid">
+    <div class="edge"><i></i>مرز ایاب و ذهاب</div>
+    <div class="edge"><i class="g"></i>مرز مناطق تهران</div>
+  </div>
+</aside>
+
+<div class="tag" id="tag" hidden></div>
+<div class="loading" id="loading">در حال بارگذاری خیابان‌ها…</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const GEO = /*__GEO__*/null;
+(function(){
+const fa = n => Number(n).toLocaleString('fa-IR');
+const LG=document.getElementById('logo'); if(LG) LG.innerHTML='__LOGO_SVG__';
+const ZONES = {
+  1:{name:'پشتیبانی حضوری', sub:'بدون هزینه‌ی ایاب و ذهاب', c:'#15936A', b:'b1', short:'حضوری'},
+  2:{name:'پشتیبانی حضوری همراه با هزینه ایاب و ذهاب', sub:'هزینه‌ی رفت‌وآمد کارشناس به فاکتور اضافه می‌شود', c:'#F5B800', b:'b2', short:'با ایاب و ذهاب'},
+  3:{name:'نیازمند تأیید فروشنده', sub:'با هزینه‌ی ایاب و ذهاب و حق مأموریت', c:'#4F5868', b:'b3', short:'نیازمند تأیید'}
+};
+
+/* ---------- zone geometry ---------- */
+const flip = r => r.map(([x,y])=>[y,x]);
+function inRing(p,r){let c=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if(((a[1]>p[1])!==(b[1]>p[1]))&&(p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0]))c=!c}return c}
+function inPoly(p,rs){if(!inRing(p,rs[0]))return false;for(let k=1;k<rs.length;k++)if(inRing(p,rs[k]))return false;return true}
+function bboxOf(g){let a=[1e9,1e9,-1e9,-1e9];const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;polys.forEach(p=>p[0].forEach(([x,y])=>{a[0]=Math.min(a[0],x);a[1]=Math.min(a[1],y);a[2]=Math.max(a[2],x);a[3]=Math.max(a[3],y)}));return a}
+GEO.districts.forEach(d=>d.bb=bboxOf(d.geometry));
+const cityBB=bboxOf(GEO.city), outerBB=bboxOf(GEO.outer);
+const inBB=(p,b)=>p[0]>=b[0]&&p[0]<=b[2]&&p[1]>=b[1]&&p[1]<=b[3];
+function inGeom(p,g){return g.type==='Polygon'?inPoly(p,g.coordinates):g.coordinates.some(c=>inPoly(p,c))}
+function classify(lon,lat){
+  const p=[lon,lat];
+  if(inBB(p,cityBB)) for(const d of GEO.districts) if(inBB(p,d.bb)&&inGeom(p,d.geometry)) return {z:1,d:d.properties.id};
+  if(inBB(p,outerBB)&&inGeom(p,GEO.outer)) return {z:2};
+  return {z:3};
+}
+
+/* ---------- map ---------- */
+const outerLL=L.latLngBounds(flip(GEO.outer.coordinates[0]));
+const isPhone=()=>innerWidth<=720;
+const fitPad=()=>isPhone()?{paddingTopLeft:[12,150],paddingBottomRight:[12,170]}:{paddingTopLeft:[40,40],paddingBottomRight:[380,40]};
+const map=L.map('map',{zoomControl:false,minZoom:9,maxZoom:16,zoomSnap:.25,wheelPxPerZoomLevel:80,maxBounds:L.latLngBounds([35.38,50.88],[35.95,51.92]),maxBoundsViscosity:.85});
+L.control.zoom({position:'bottomleft',zoomInTitle:'بزرگ‌نمایی',zoomOutTitle:'کوچک‌نمایی'}).addTo(map);
+map.attributionControl.setPrefix(false).addAttribution('داده‌ی نقشه © مشارکت‌کنندگان <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · مرز مناطق: شهرداری تهران');
+map.fitBounds(outerLL,fitPad());
+
+[['fill',410],['dists',420],['edges',430],['labels',600],['pins',650]].forEach(([n,z])=>{const p=map.createPane(n);p.style.zIndex=z;if(n==='labels')p.style.pointerEvents='none'});
+map.getPane('fill').classList.add('fillpane');
+
+/* ---------- basemap (vector data drawn into canvas tiles) ---------- */
+const BM={ready:false,minorReady:false,cls:{}};
+const R=Math.PI/180;
+const mx=lon=>(lon+180)/360*256, my=lat=>(1-Math.log(Math.tan(lat*R)+1/Math.cos(lat*R))/Math.PI)/2*256;
+function decode(arr,W,S,Q){const n=arr.length/2,out=new Float64Array(arr.length);let x=0,y=0,bx0=1e9,by0=1e9,bx1=-1e9,by1=-1e9;
+  for(let i=0;i<n;i++){x+=arr[2*i];y+=arr[2*i+1];const lon=W+x/Q,lat=S+y/Q,X=mx(lon),Y=my(lat);out[2*i]=X;out[2*i+1]=Y;
+    if(X<bx0)bx0=X;if(X>bx1)bx1=X;if(Y<by0)by0=Y;if(Y>by1)by1=Y}
+  return {p:out,bb:[bx0,by0,bx1,by1]}}
+function ingest(data){
+  const [W,S]=data.bbox,Q=data.q;
+  for(const [k,list] of Object.entries(data.layers)){
+    const nm=(data.names&&data.names[k])||[];
+    BM.cls[k]=list.map((f,i)=>{
+      if(Array.isArray(f[0])){const rings=f.map(r=>decode(r,W,S,Q));return {rings,bb:rings[0].bb,n:nm[i]||''}}
+      const d=decode(f,W,S,Q);return {p:d.p,bb:d.bb,n:nm[i]||''};
+    });
+  }
+  if(data.places) BM.places=data.places;
+}
+const ROADS=['minor','link','tertiary','secondary','primary','mlink','trunk','motorway'];
+const STY={
+  motorway:{f:'#7D8799',c:'#4F5868',w:{9:1.6,10:2.2,11:3,12:4,13:5.5,14:7.5,15:10,16:13}},
+  trunk:{f:'#8F98A8',c:'#58616F',w:{9:1.3,10:1.8,11:2.6,12:3.5,13:5,14:7,15:9,16:12}},
+  mlink:{f:'#8F98A8',c:'#58616F',w:{11:1,12:1.6,13:2.4,14:3.5,15:5,16:6.5},min:11},
+  primary:{f:'#FFFFFF',c:'#A3A9B3',w:{9:.8,10:1.2,11:1.9,12:2.8,13:4,14:6,15:8.5,16:11}},
+  secondary:{f:'#FFFFFF',c:'#BCC1C8',w:{10:.8,11:1.2,12:2,13:3,14:4.8,15:7,16:9.5},min:10},
+  tertiary:{f:'#FFFFFF',c:'#CACED4',w:{11:.7,12:1.1,13:1.9,14:3.4,15:5.5,16:7.5},min:11},
+  link:{f:'#FFFFFF',c:'#C3C7CD',w:{12:1,13:1.6,14:2.6,15:4,16:5.5},min:12},
+  minor:{f:'#FFFFFF',c:'#D5D8DC',w:{13:.8,14:1.6,15:3,16:4.6},min:13}
+};
+function wAt(s,z){const ks=Object.keys(s.w).map(Number);if(z<ks[0])return 0;let lo=ks[0];for(const k of ks){if(k<=z)lo=k}const hi=ks.find(k=>k>lo);if(!hi)return s.w[lo];const t=z-lo;return s.w[lo]+(s.w[hi]-s.w[lo])*Math.min(1,t)}
+function strokeLines(ctx,list,ox,oy,sc,tb){
+  ctx.beginPath();
+  for(const f of list){const b=f.bb;if(b[2]<tb[0]||b[0]>tb[2]||b[3]<tb[1]||b[1]>tb[3])continue;const p=f.p;ctx.moveTo(p[0]*sc-ox,p[1]*sc-oy);for(let i=2;i<p.length;i+=2)ctx.lineTo(p[i]*sc-ox,p[i+1]*sc-oy)}
+  ctx.stroke();
+}
+function fillPolys(ctx,list,ox,oy,sc,tb){
+  ctx.beginPath();
+  for(const f of list){const b=f.bb;if(b[2]<tb[0]||b[0]>tb[2]||b[3]<tb[1]||b[1]>tb[3])continue;
+    for(const r of f.rings){const p=r.p;ctx.moveTo(p[0]*sc-ox,p[1]*sc-oy);for(let i=2;i<p.length;i+=2)ctx.lineTo(p[i]*sc-ox,p[i+1]*sc-oy);ctx.closePath()}}
+  ctx.fill('evenodd');
+}
+const Base=L.GridLayer.extend({
+  createTile(c){
+    const t=document.createElement('canvas'),dpr=Math.min(2,window.devicePixelRatio||1),sz=256;
+    t.width=sz*dpr;t.height=sz*dpr;const ctx=t.getContext('2d');ctx.scale(dpr,dpr);
+    const z=c.z,sc=Math.pow(2,z),ox=c.x*256,oy=c.y*256,m=24/sc;
+    const tb=[c.x*256/sc-m,c.y*256/sc-m,(c.x+1)*256/sc+m,(c.y+1)*256/sc+m];
+    ctx.fillStyle='#EDEDE8';ctx.fillRect(0,0,sz,sz);
+    if(!BM.ready) return t;
+    const C=BM.cls;
+    ctx.fillStyle='#E4E1EC';fillPolys(ctx,C.airport||[],ox,oy,sc,tb);
+    ctx.fillStyle='#D6E6CC';fillPolys(ctx,C.green||[],ox,oy,sc,tb);
+    ctx.fillStyle='#B7D5EA';fillPolys(ctx,C.water||[],ox,oy,sc,tb);
+    ctx.lineCap='round';ctx.lineJoin='round';
+    if(z>=11){ctx.strokeStyle='#A9CBE3';ctx.lineWidth=z>=14?3:1.4;strokeLines(ctx,C.river||[],ox,oy,sc,tb)}
+    if(z>=11){ctx.strokeStyle='#A6ABB3';ctx.lineWidth=z>=14?2:1.2;ctx.setLineDash([4,3]);strokeLines(ctx,C.rail||[],ox,oy,sc,tb);ctx.setLineDash([])}
+    const zz=Math.round(z);
+    // casings then fills, minor first so major roads sit on top
+    for(const k of ROADS){const s=STY[k],w=wAt(s,zz);if(!w||!C[k])continue;if(w>=1.6){ctx.strokeStyle=s.c;ctx.lineWidth=w+(k==='motorway'||k==='trunk'?2:1.6);strokeLines(ctx,C[k],ox,oy,sc,tb)}}
+    for(const k of ROADS){const s=STY[k],w=wAt(s,zz);if(!w||!C[k])continue;ctx.strokeStyle=w<1.6?s.c:s.f;ctx.lineWidth=w;strokeLines(ctx,C[k],ox,oy,sc,tb)}
+    return t;
+  }
+});
+const base=new Base({tileSize:256,updateWhenZooming:false,keepBuffer:3}).addTo(map);
+
+/* ---------- zone overlays ---------- */
+const OUT=flip(GEO.outer.coordinates[0]), CITY=flip(GEO.city.coordinates[0]);
+const WORLD=[[34.6,50.0],[34.6,53.0],[36.9,53.0],[36.9,50.0]];
+const z3=L.polygon([WORLD,OUT],{pane:'fill',className:'z3',stroke:false,interactive:false}).addTo(map);
+const z2=L.polygon([OUT,CITY],{pane:'fill',className:'z2',stroke:false,interactive:false}).addTo(map);
+const z1=L.polygon(CITY,{pane:'fill',className:'z1',stroke:false,interactive:false}).addTo(map);
+const svgFill=z3.getElement().ownerSVGElement;
+const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)"><rect width="10" height="10" fill="#4F5868" fill-opacity=".10"/><line x1="0" y1="0" x2="0" y2="10" stroke="#4F5868" stroke-width="1.6" stroke-opacity=".30"/></pattern>';
+svgFill.insertBefore(defs,svgFill.firstChild);
+
+const distLayers={};
+GEO.districts.forEach(d=>{
+  const g=d.geometry,rings=g.type==='Polygon'?[g.coordinates.map(flip)]:g.coordinates.map(p=>p.map(flip));
+  distLayers[d.properties.id]=L.polygon(rings,{pane:'dists',className:'dist',interactive:false}).addTo(map);
+});
+L.polygon(CITY,{pane:'edges',className:'city-edge',interactive:false}).addTo(map);
+L.polygon(OUT,{pane:'edges',className:'y-case',interactive:false}).addTo(map);
+const yEdge=L.polygon(OUT,{pane:'edges',className:'y-edge',interactive:false}).addTo(map);
+const yRun=L.polygon(OUT,{pane:'edges',className:'y-run',interactive:false}).addTo(map);
+const yDraw=L.polygon(OUT,{pane:'edges',className:'y-draw',interactive:false}).addTo(map);
+const setPL=()=>{[yRun,yDraw].forEach(l=>{const e=l.getElement();if(e)e.setAttribute('pathLength','1')})};
+setPL();map.on('zoomend moveend viewreset',setPL);
+yEdge.getElement().style.opacity='0';
+setTimeout(()=>{const e=yEdge.getElement();e.style.transition='opacity .5s';e.style.opacity='1'},2500);
+setTimeout(()=>map.removeLayer(yDraw),3000);
+
+/* ---------- labels (one canvas, redrawn after each move) ---------- */
+const lc=document.createElement('canvas');lc.style.position='absolute';map.getPane('labels').appendChild(lc);
+const lctx=lc.getContext('2d');
+function txtBox(x,y,w,h,a){const c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));const W2=(w*c+h*s)/2,H2=(w*s+h*c)/2;return [x-W2,y-H2,x+W2,y+H2]}
+function hit(b,boxes){for(const o of boxes)if(b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1])return true;return false}
+function drawText(t,x,y,a,font,fill,halo,hw){lctx.save();lctx.translate(x,y);lctx.rotate(a);lctx.font=font;lctx.textAlign='center';lctx.textBaseline='middle';lctx.direction='rtl';
+  lctx.lineJoin='round';lctx.strokeStyle=halo;lctx.lineWidth=hw;lctx.strokeText(t,0,0);lctx.fillStyle=fill;lctx.fillText(t,0,0);lctx.restore()}
+function drawLabels(){
+  const size=map.getSize(),dpr=Math.min(2,window.devicePixelRatio||1);
+  lc.width=size.x*dpr;lc.height=size.y*dpr;lc.style.width=size.x+'px';lc.style.height=size.y+'px';
+  L.DomUtil.setPosition(lc,map.containerPointToLayerPoint([0,0]));
+  lctx.setTransform(dpr,0,0,dpr,0,0);lctx.clearRect(0,0,size.x,size.y);
+  const z=map.getZoom(),sc=Math.pow(2,z),org=map.getPixelOrigin(),pb=map.getPixelBounds();
+  const ox=pb.min.x,oy=pb.min.y; const boxes=[];
+  // reserve the floating cards
+  document.querySelectorAll('.brandcard,.legend').forEach(el=>{const r=el.getBoundingClientRect(),m=map.getContainer().getBoundingClientRect();boxes.push([r.left-m.left-6,r.top-m.top-6,r.right-m.left+6,r.bottom-m.top+6])});
+  const proj=(lon,lat)=>[mx(lon)*sc-ox,my(lat)*sc-oy];
+  const vis=(x,y)=>x>-40&&y>-20&&x<size.x+40&&y<size.y+20;
+  const place=(t,x,y,font,fill,halo,hw,pad=4,dot)=>{
+    lctx.font=font;const w=lctx.measureText(t).width,h=parseFloat(font.match(/(\d+(\.\d+)?)px/)[1])*1.25;
+    const b=txtBox(x,y,w+pad*2,h+pad,0);if(hit(b,boxes))return false;boxes.push(b);
+    if(dot){lctx.fillStyle=dot;lctx.beginPath();lctx.arc(x+w/2+7,y,3.2,0,7);lctx.fill();lctx.strokeStyle='#fff';lctx.lineWidth=1.5;lctx.stroke()}
+    drawText(t,x,y,0,font,fill,halo,hw);return true};
+  // 1. district names at city scale
+  if(z<12.5) GEO.districts.forEach(d=>{const [x,y]=proj(d.properties.lx,d.properties.ly);if(vis(x,y))place(`منطقه ${fa(d.properties.id)}`,x,y,`800 ${z<10.5?11:13}px 'Yekan Bakh', Vazirmatn, Tahoma, sans-serif`,'#0B6B4C','rgba(255,255,255,.92)',3.5)});
+  // 2. towns around Tehran (always)
+  GEO.places.forEach(p=>{const [x,y]=proj(p.lon,p.lat);if(vis(x,y))place(p.n,x,y,`700 ${z<11?12:13.5}px 'Yekan Bakh', Vazirmatn, Tahoma, sans-serif`,'#1C1F23','rgba(255,255,255,.95)',3.5,4,ZONES[p.z].c)});
+  if(!BM.ready) return;
+  // 3. road names along straight runs
+  const roadZ={motorway:10.5,trunk:11,primary:12.25,secondary:13.5,tertiary:14.5,minor:15.25};
+  const seen={};
+  for(const k of ['motorway','trunk','primary','secondary','tertiary','minor']){
+    if(z<roadZ[k]||!BM.cls[k])continue;
+    const fs=k==='motorway'||k==='trunk'?12.5:(k==='minor'?11:12), font=`${k==='motorway'||k==='trunk'?700:600} ${fs}px 'Yekan Bakh', Vazirmatn, Tahoma, sans-serif`;
+    const fill=k==='motorway'||k==='trunk'?'#2F3542':'#3B4352';
+    lctx.font=font;
+    const vb=[(pb.min.x)/sc,(pb.min.y)/sc,(pb.max.x)/sc,(pb.max.y)/sc];
+    for(const f of BM.cls[k]){
+      if(!f.n)continue;const b=f.bb;if(b[2]<vb[0]||b[0]>vb[2]||b[3]<vb[1]||b[1]>vb[3])continue;
+      const tw=lctx.measureText(f.n).width+18;const p=f.p;
+      // walk runs of nearly-straight segments in screen space
+      let runStart=0,acc=0;
+      for(let i=2;i<=p.length;i+=2){
+        let breakRun=i===p.length;
+        if(!breakRun&&i>=4){const a1=Math.atan2(p[i-1]-p[i-3],p[i-2]-p[i-4]),a2=Math.atan2(p[i+1]-p[i-1],p[i]-p[i-2]);let d=Math.abs(a1-a2);if(d>Math.PI)d=2*Math.PI-d;if(d>.22)breakRun=true}
+        if(!breakRun)continue;
+        const x0=p[runStart]*sc-ox,y0=p[runStart+1]*sc-oy,x1=p[i-2]*sc-ox,y1=p[i-1]*sc-oy;const L2=Math.hypot(x1-x0,y1-y0);
+        runStart=i-2;
+        if(L2<tw)continue;const cx=(x0+x1)/2,cy=(y0+y1)/2;if(!vis(cx,cy)||cx<0||cy<0||cx>size.x||cy>size.y)continue;
+        const last=seen[f.n];if(last&&last.some(([sx,sy])=>Math.hypot(sx-cx,sy-cy)<(k==='minor'?260:340)))continue;
+        let a=Math.atan2(y1-y0,x1-x0);if(a>Math.PI/2)a-=Math.PI;if(a<-Math.PI/2)a+=Math.PI;
+        const bx=txtBox(cx,cy,tw,fs*1.4,a);if(hit(bx,boxes))continue;boxes.push(bx);(seen[f.n]=seen[f.n]||[]).push([cx,cy]);
+        drawText(f.n,cx,cy,a,font,fill,'rgba(255,255,255,.95)',3.5);
+      }
+    }
+  }
+  // 4. neighbourhoods
+  if(BM.places){
+    for(const p of BM.places){
+      const need=p.k==='suburb'||p.k==='quarter'?11.75:(p.k==='neighbourhood'?13.5:(p.k==='village'?12.5:99));
+      if(z<need)continue;const [x,y]=proj(p.x,p.y);if(!vis(x,y))continue;
+      place(p.t,x,y,`${p.k==='suburb'?700:600} ${p.k==='suburb'?12.5:11.5}px 'Yekan Bakh', Vazirmatn, Tahoma, sans-serif`,p.k==='suburb'?'#3B4352':'#5A6270','rgba(255,255,255,.92)',3.2);
+    }
+  }
+}
+map.on('moveend zoomend resize',drawLabels);
+const zcls=()=>map.getContainer().classList.toggle('zhi',map.getZoom()>=12.5);map.on('zoomend',zcls);zcls();
+map.on('zoomstart',()=>{lc.style.opacity='0'});map.on('zoomend',()=>{lc.style.opacity='1'});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLabels);
+drawLabels();
+
+/* ---------- load street data ---------- */
+const loading=document.getElementById('loading');
+// street data ships inside the page (gzip + base64) so the file also works when downloaded and opened offline
+async function loadData(id,url){
+  const el=document.getElementById(id);
+  if(el&&el.textContent.trim()&&'DecompressionStream' in window){
+    const bin=Uint8Array.from(atob(el.textContent.trim()),c=>c.charCodeAt(0));
+    return await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).json();
+  }
+  const r=await fetch(url);if(!r.ok)throw new Error(url);return r.json();
+}
+(async()=>{
+  try{
+    ingest(await loadData('bm-base','base.json'));BM.ready=true;base.redraw();drawLabels();loading.hidden=true;indexPlaces();
+    const m=await loadData('bm-minor','minor.json');ingest(m);BM.minorReady=true;base.redraw();if(map.getZoom()>=13)drawLabels();
+  }catch(e){loading.textContent='داده‌ی خیابان‌ها بارگذاری نشد. صفحه را دوباره باز کنید.';setTimeout(()=>loading.hidden=true,4000)}
+})();
+
+/* ---------- hover tag + zone highlight ---------- */
+const tag=document.getElementById('tag'),mc=map.getContainer();let raf=0,lastZ=0,lastD=0;
+function tagHTML(c){const Z=ZONES[c.z];return `<b style="--tc:${Z.c}"><i></i>${Z.name}</b><span>${c.z===1?`منطقه ${fa(c.d)} تهران<br>`:''}${Z.sub}</span>`}
+map.on('mousemove',e=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;
+  const c=classify(e.latlng.lng,e.latlng.lat);
+  if(c.z!==lastZ||c.d!==lastD){tag.innerHTML=tagHTML(c);mc.classList.remove('hz1','hz2','hz3');mc.classList.add('hz'+c.z);
+    if(lastD&&distLayers[lastD])distLayers[lastD].getElement()?.classList.remove('hl');if(c.d)distLayers[c.d].getElement()?.classList.add('hl');lastZ=c.z;lastD=c.d||0}
+  tag.style.left=e.originalEvent.clientX+'px';tag.style.top=e.originalEvent.clientY+'px';tag.hidden=false})});
+map.on('mouseout',()=>{tag.hidden=true;mc.classList.remove('hz1','hz2','hz3');if(lastD&&distLayers[lastD])distLayers[lastD].getElement()?.classList.remove('hl');lastZ=0;lastD=0});
+map.on('movestart',()=>{tag.hidden=true});
+
+/* ---------- click / search result ---------- */
+let pin=null;
+function probe(ll,label){
+  const c=classify(ll.lng,ll.lat),Z=ZONES[c.z];
+  if(pin)map.removeLayer(pin);
+  pin=L.marker(ll,{pane:'pins',interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[0,0],html:'<div class="pin"><b></b><b></b><i></i></div>'})}).addTo(map);
+  const where=label||(c.z===1?`منطقه ${fa(c.d)} تهران`:'نقطه‌ی انتخاب‌شده');
+  const extra=c.z===1&&label&&!label.startsWith('منطقه')?` · منطقه ${fa(c.d)}`:'';
+  L.popup({offset:[0,-10],autoPanPaddingTopLeft:[20,isPhone()?160:20],autoPanPaddingBottomRight:isPhone()?[20,190]:[380,20]}).setLatLng(ll)
+   .setContent(`<div class="ps">${where}${extra}</div><div class="pz" style="--pc:${Z.c}"><i></i>${Z.name}</div><div class="ps">${Z.sub}</div><div class="pc">${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}</div>`).openOn(map);
+}
+map.on('click',e=>probe(e.latlng));
+
+/* ---------- legend: focus a zone ---------- */
+let focus=0;const rows=[...document.querySelectorAll('.row')];
+rows.forEach(r=>r.addEventListener('click',()=>{const z=+r.dataset.z;focus=focus===z?0:z;
+  mc.classList.remove('f1','f2','f3');if(focus)mc.classList.add('f'+focus);rows.forEach(x=>x.classList.toggle('on',+x.dataset.z===focus));
+  if(focus===1)map.flyToBounds(L.latLngBounds(CITY),{...fitPad(),duration:.9});else if(focus)map.flyToBounds(outerLL.pad(focus===3?.25:0),{...fitPad(),duration:.9});}));
+const lg=document.getElementById('legend'),cb=document.getElementById('collapse');
+const setLH=()=>document.documentElement.style.setProperty('--lh',(isPhone()?lg.offsetHeight+8:0)+'px');
+cb.addEventListener('click',()=>{lg.classList.toggle('min');cb.textContent=lg.classList.contains('min')?'باز کردن':'جمع کردن';setLH();drawLabels()});
+if(isPhone()){lg.classList.add('min');cb.textContent='باز کردن'}
+setLH();addEventListener('resize',setLH);
+
+/* reset view */
+const Reset=L.Control.extend({options:{position:'bottomleft'},onAdd(){const c=L.DomUtil.create('div','leaflet-bar'),a=L.DomUtil.create('a','reset-btn',c);
+  a.href='#';a.textContent='نمای کامل';a.setAttribute('role','button');
+  L.DomEvent.on(a,'click',e=>{L.DomEvent.preventDefault(e);L.DomEvent.stopPropagation(e);map.flyToBounds(outerLL,{...fitPad(),duration:.8})});return c}});
+map.addControl(new Reset());
+
+/* ---------- search ---------- */
+const q=document.getElementById('q'),res=document.getElementById('results');
+const norm=s=>(s||'').replace(/[‌‏\s\-]+/g,'').replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[أإآ]/g,'ا').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).toLowerCase();
+let index=[];
+const KIND={suburb:'محله',neighbourhood:'محله',quarter:'محله',village:'روستا',town:'شهر',city:'شهر'};
+function indexPlaces(){
+  index=[
+    ...GEO.districts.map(d=>({t:`منطقه ${fa(d.properties.id)}`,k:'منطقه'+d.properties.id,kind:'منطقه‌ی شهرداری',ll:[d.properties.ly,d.properties.lx],bounds:distLayers[d.properties.id].getBounds()})),
+    ...GEO.places.map(p=>({t:p.n,k:p.n,kind:'شهر',ll:[p.lat,p.lon],zoom:12.5})),
+    ...((BM.places||[]).filter(p=>p.k!=='city').map(p=>({t:p.t,k:p.t,kind:KIND[p.k]||'',ll:[p.y,p.x],zoom:p.k==='neighbourhood'?15:14})))
+  ];
+  index.forEach(it=>{it.nk=norm(it.k);it.c=classify(it.ll[1],it.ll[0])});
+}
+indexPlaces();
+function go(it){
+  if(it.bounds)map.flyToBounds(it.bounds,{...fitPad(),duration:.8,maxZoom:13});else map.flyTo(it.ll,it.zoom,{duration:.9});
+  map.once('moveend',()=>probe(L.latLng(it.ll[0],it.ll[1]),it.t));
+}
+function render(){const v=norm(q.value);if(!v){res.hidden=true;return}
+  const hits=index.filter(it=>it.nk.includes(v)).sort((a,b)=>(a.nk.startsWith(v)?0:1)-(b.nk.startsWith(v)?0:1)||a.nk.length-b.nk.length).slice(0,9);
+  res.innerHTML='';res.hidden=false;
+  if(!hits.length){res.innerHTML='<div class="empty">پیدا نشد. نقطه‌ی مورد نظر را مستقیم روی نقشه بزنید.</div>';return}
+  hits.forEach(h=>{const b=document.createElement('button');b.type='button';const Z=ZONES[h.c.z];
+    b.innerHTML=`<span>${h.t}<small>${h.kind}</small></span><span class="badge ${Z.b}">${Z.short}</span>`;
+    b.addEventListener('click',()=>{go(h);res.hidden=true;q.value=h.t;q.blur()});res.appendChild(b)});
+}
+q.addEventListener('input',render);
+q.addEventListener('keydown',e=>{if(e.key==='Enter'){const f=res.querySelector('button');if(f)f.click()}if(e.key==='Escape')res.hidden=true});
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))res.hidden=true});
+addEventListener('resize',()=>map.invalidateSize());
+})();
+</script>
